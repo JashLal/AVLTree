@@ -1,3 +1,7 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 /**
  * Binary search tree with self-balancing capabilities. Doesn't allow duplicates.
  * The data structure can be instantiated to contain a pool of nodes for increased efficiency of insertions.
@@ -77,19 +81,19 @@ public class AVLTree<T extends Comparable<? super T>> {
             if (cur.right == null) {
                 cur.right = new AVLNode(data);
                 // if there is no left subtree, increase the balance
-                if (cur.balance == 0) {
-                    cur.balance++;
-                }
+                cur.balance++;
                 return true;
             }
+            // get balance of right tree to see if it changes
+            short balance = cur.right.balance;
             // check if node was inserted
             if (insert(data, cur.right)) {
                 // if rebalancing is required
                 if (cur.right.balance == 2) {
                     cur.right = this.reBalanceRight(cur.right);
                 }
-                // increase balance only if rotating is not required and the balance isn't 0 (height increased)
-                else if (cur.right.balance != 0) {
+                // increase balance only if rotating is not required and the balance of the right changed (rotating didn't occur)
+                else if (cur.right.balance != balance && cur.right.balance != 0) {
                     cur.balance++;
                 }
                 return true;
@@ -101,19 +105,18 @@ public class AVLTree<T extends Comparable<? super T>> {
             // at node if at end of tree
             if (cur.left == null) {
                 cur.left = new AVLNode(data);
-                if (cur.balance == 0) {
-                    cur.balance--;
-                }
+                cur.balance--;
                 return true;
             }
+            short balance = cur.left .balance;
             // check if node was inserted
             if (insert(data, cur.left)) {
                 // if rebalancing is required
                 if (cur.left.balance == -2) {
                     cur.left = this.reBalanceLeft(cur.left);
                 }
-                // decrement balance only if rotating is not required
-                else if (cur.left.balance != 0) {
+                // decrement balance only if rotating is not required and it did not occur before
+                else if (cur.left.balance != balance && cur.left.balance != 0) {
                     cur.balance--;
                 }
                 return true;
@@ -184,6 +187,30 @@ public class AVLTree<T extends Comparable<? super T>> {
             right += cur.right.balance + 1;
         }
         return (short) (left + right);
+    }
+
+    public void printTreeFile(String filename) {
+        try (FileWriter writer = new FileWriter(filename)) {
+            printTreeString(this.root, writer, 1);
+        }
+        catch (IOException e) {
+            System.err.println("File " + filename + " not found");
+        }
+    }
+
+    private void printTreeString(AVLNode node, FileWriter writer, int level) throws IOException {
+        if (node != null) {
+            printTreeString(node.left, writer, level + 1);
+            for (int i = 0; i < level; i++) {
+                writer.write('-');
+            }
+            writer.write("   ");
+            writer.write(node.data.toString());
+            writer.write(" (" + node.balance);
+            writer.write(")");
+            writer.write('\n');
+            printTreeString(node.right, writer, level + 1);
+        }
     }
 
     /**

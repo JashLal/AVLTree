@@ -7,7 +7,6 @@ public class Main {
         tree.insert(6);
         tree.insert(5);
         tree.insert(7);
-        tree.insert(4);
-        tree.printTree();
+        tree.printTreeFile("work.txt");
     }
 }
