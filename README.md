@@ -4,4 +4,4 @@ This is a generic AVLTree implementation in Java. An AVLTree is a binary search 
 
 ### Node Pool
 
-This implementation features the option of a node pool. If enabled, the node pool is filled with nodes removed from the tree during deletion. Aditionally, if nodes are available in the pool, they are used during insertion. Users can decide to enable the pool and set its max capacity.
+This implementation features the option of a node pool. If enabled, the node pool is filled with nodes removed from the tree during deletion. Additionally, if nodes are available in the pool, they are used during insertion. Users can decide to enable the pool and set its max capacity.
