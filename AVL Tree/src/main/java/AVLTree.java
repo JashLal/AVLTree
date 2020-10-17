@@ -1,6 +1,6 @@
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Math;
 
 /**
  * Binary search tree with self-balancing capabilities. Doesn't allow duplicates.
@@ -156,9 +156,9 @@ public class AVLTree<T extends Comparable<? super T>> {
 //            this.root = newHead;
 //        }
         head.right = temp;
-        // re-balance head first as it is the new child
-        this.reBalance(head);
-        this.reBalance(newHead);
+        // re-balance with balance fixing formulas
+        head.balance = (short) (head.balance - 1 - Math.max(0, newHead.balance));
+        newHead.balance = (short) (newHead.balance - 1 + Math.min(head.balance, 0));
         return newHead;
     }
 
@@ -172,24 +172,24 @@ public class AVLTree<T extends Comparable<? super T>> {
 //            this.root = newHead;
 //        }
         head.left = temp;
-        // re-balance head first as it is the new child
-        this.reBalance(head);
-        this.reBalance(newHead);
+        // re-balance with balance fixing formulas
+        head.balance = (short) (head.balance + 1 - Math.min(newHead.balance, 0));
+        newHead.balance = (short) (newHead.balance + 1 + Math.max(head.balance, 0));
         return newHead;
     }
 
-    private short reBalance(AVLNode cur) {
-        short left = 0, right = 0;
-        if (cur.left != null) {
-            left += cur.left.balance - 1;
-        }
-        if (cur.right != null) {
-            right += cur.right.balance + 1;
-        }
-        return (short) (left + right);
-    }
+//    private void reBalance(AVLNode cur) {
+//        short left = 0, right = 0;
+//        if (cur.left != null) {
+//            left += cur.left.balance - 1;
+//        }
+//        if (cur.right != null) {
+//            right += cur.right.balance + 1;
+//        }
+//        cur.balance =  (short) (left + right);
+//    }
 
-    public void printTreeFile(String filename) {
+    protected void printTreeFile(String filename) {
         try (FileWriter writer = new FileWriter(filename)) {
             printTreeString(this.root, writer, 1);
         }
@@ -215,7 +215,7 @@ public class AVLTree<T extends Comparable<? super T>> {
 
     /**
      * Determines if the pool is empty
-     * @return
+     * @return whether the pool is empty
      */
     public boolean isEmpty() {
         return this.root == null;
@@ -225,7 +225,7 @@ public class AVLTree<T extends Comparable<? super T>> {
      * Prints a view of the tree out to console
      */
     public void printTree( ) {
-        if ( isEmpty( ) )
+        if (this.isEmpty())
             System.out.println( "Empty tree" );
         else
             printTree( this.root, 0 );
