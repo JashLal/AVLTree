@@ -94,4 +94,19 @@ public class AVLTreeTest {
         avlTree.printTreeFile("ResultsFiles/testLeftRightComplex.txt");
         assertTrue(FileComparator.compareFiles("ResultsFiles/testLeftRightComplex.txt", "TestFiles/testLeftRightComplex.txt"));
     }
+
+    @Test
+    void testRandomInsertions() {
+        try {
+            PermutationGenerator permutationGenerator = new PermutationGenerator(-1000, 1000);
+            for (int i : permutationGenerator) {
+                avlTree.insert(i);
+                assertTrue(avlTree.isBalanced());
+            }
+            avlTree.printTreeFile("test.txt");
+        }
+        catch (InvalidBoundsException e) {
+            e.printStackTrace();
+        }
+    }
 }

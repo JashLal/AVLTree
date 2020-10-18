@@ -63,61 +63,40 @@ public class AVLTree<T extends Comparable<? super T>> {
             return true;
         }
         if (insert(data, this.root)) {
-            if (this.root.balance == 2) {
-                this.root = this.reBalanceRight(this.root);
-            }
-            else if (this.root.balance == -2) {
-                this.root = this.reBalanceLeft(this.root);
-            }
+            this.root = reBalance(this.root);
             return true;
         }
         return false;
     }
 
     private boolean insert(T data, AVLNode cur) {
-        // data is larger than cur
-        if (cur.data.compareTo(data) < 0) {
-            // at node if at end of tree
-            if (cur.right == null) {
-                cur.right = new AVLNode(data);
-                // if there is no left subtree, increase the balance
-                cur.balance++;
-                return true;
-            }
-            // get balance of right tree to see if it changes
-            short balance = cur.right.balance;
-            // check if node was inserted
-            if (insert(data, cur.right)) {
-                // if rebalancing is required
-                if (cur.right.balance == 2) {
-                    cur.right = this.reBalanceRight(cur.right);
-                }
-                // increase balance only if rotating is not required and the balance of the right changed (rotating didn't occur)
-                else if (cur.right.balance != balance && cur.right.balance != 0) {
-                    cur.balance++;
-                }
-                return true;
-            }
-            return false;
-        }
-        // data is smaller than cur
-        else if (cur.data.compareTo(data) > 0) {
-            // at node if at end of tree
+        if (data.compareTo(cur.data) < 0) {
             if (cur.left == null) {
                 cur.left = new AVLNode(data);
                 cur.balance--;
                 return true;
             }
-            short balance = cur.left .balance;
-            // check if node was inserted
+            int oldBalance = cur.left.balance;
             if (insert(data, cur.left)) {
-                // if rebalancing is required
-                if (cur.left.balance == -2) {
-                    cur.left = this.reBalanceLeft(cur.left);
-                }
-                // decrement balance only if rotating is not required and it did not occur before
-                else if (cur.left.balance != balance && cur.left.balance != 0) {
+                cur.left = reBalance(cur.left);
+                if (cur.left.balance != oldBalance && cur.left.balance != 0) {
                     cur.balance--;
+                }
+                return true;
+            }
+            return false;
+        }
+        else if (data.compareTo(cur.data) > 0) {
+            if (cur.right == null) {
+                cur.right = new AVLNode(data);
+                cur.balance++;
+                return true;
+            }
+            int oldBalance = cur.right.balance;
+            if (insert(data, cur.right)) {
+                cur.right = reBalance(cur.right);
+                if (cur.right.balance != oldBalance && cur.right.balance != 0) {
+                    cur.balance++;
                 }
                 return true;
             }
@@ -126,6 +105,68 @@ public class AVLTree<T extends Comparable<? super T>> {
         else {
             return false;
         }
+    }
+
+//    private boolean insert(T data, AVLNode cur) {
+//        // data is larger than cur
+//        if (cur.data.compareTo(data) < 0) {
+//            // at node if at end of tree
+//            if (cur.right == null) {
+//                cur.right = new AVLNode(data);
+//                // if there is no left subtree, increase the balance
+//                cur.balance++;
+//                return true;
+//            }
+//            // get balance of right tree to see if it changes
+//            short balance = cur.right.balance;
+//            // check if node was inserted
+//            if (insert(data, cur.right)) {
+//                // if rebalancing is required
+//                cur.right = this.reBalance(cur.right);
+//                // increase balance only if rotating is not required and the balance of the right changed (rotating didn't occur)
+//                else if (cur.right.balance != balance && cur.right.balance != 0) {
+//                    cur.balance++;
+//                }
+//                return true;
+//            }
+//            return false;
+//        }
+//        // data is smaller than cur
+//        else if (cur.data.compareTo(data) > 0) {
+//            // at node if at end of tree
+//            if (cur.left == null) {
+//                cur.left = new AVLNode(data);
+//                cur.balance--;
+//                return true;
+//            }
+//            short balance = cur.left.balance;
+//            // check if node was inserted
+//            if (insert(data, cur.left)) {
+//                // if rebalancing is required
+//                if (cur.left.balance == -2) {
+//                    cur.left = this.reBalanceLeft(cur.left);
+//                }
+//                // decrement balance only if rotating is not required and it did not occur before
+//                else if (cur.left.balance != balance && cur.left.balance != 0) {
+//                    cur.balance--;
+//                }
+//                return true;
+//            }
+//            return false;
+//        }
+//        else {
+//            return false;
+//        }
+//    }
+
+    private AVLNode reBalance(AVLNode cur) {
+        if (cur.balance >= 2) {
+            return reBalanceRight(cur);
+        }
+        else if (cur.balance <= -2) {
+            return reBalanceLeft(cur);
+        }
+        return cur;
     }
 
     private AVLNode reBalanceRight(AVLNode cur) {
@@ -151,10 +192,6 @@ public class AVLTree<T extends Comparable<? super T>> {
         // node to be moved to old head's right tree (could be null)
         AVLNode temp = newHead.left;
         newHead.left = head;
-//        // if head is the root, reset the root to the new head
-//        if (head == this.root) {
-//            this.root = newHead;
-//        }
         head.right = temp;
         // re-balance with balance fixing formulas
         head.balance = (short) (head.balance - 1 - Math.max(0, newHead.balance));
@@ -167,27 +204,12 @@ public class AVLTree<T extends Comparable<? super T>> {
         // node to be moved to old head's left tree (could be null)
         AVLNode temp = newHead.right;
         newHead.right = head;
-//        // if head is the root, reset the root be the new head
-//        if (head == this.root) {
-//            this.root = newHead;
-//        }
         head.left = temp;
         // re-balance with balance fixing formulas
         head.balance = (short) (head.balance + 1 - Math.min(newHead.balance, 0));
         newHead.balance = (short) (newHead.balance + 1 + Math.max(head.balance, 0));
         return newHead;
     }
-
-//    private void reBalance(AVLNode cur) {
-//        short left = 0, right = 0;
-//        if (cur.left != null) {
-//            left += cur.left.balance - 1;
-//        }
-//        if (cur.right != null) {
-//            right += cur.right.balance + 1;
-//        }
-//        cur.balance =  (short) (left + right);
-//    }
 
     protected void printTreeFile(String filename) {
         try (FileWriter writer = new FileWriter(filename)) {
@@ -196,6 +218,26 @@ public class AVLTree<T extends Comparable<? super T>> {
         catch (IOException e) {
             System.err.println("File " + filename + " not found");
         }
+    }
+
+    private class Height {
+        private int height;
+    }
+
+    protected boolean isBalanced() {
+        return isBalanced(this.root, new Height());
+    }
+
+    private boolean isBalanced(AVLNode cur, Height height) {
+        if (cur == null) {
+            // height is set to 0 by default
+            return true;
+        }
+        Height left = new Height(), right = new Height();
+        boolean leftBalanced = isBalanced(cur.left, left);
+        boolean rightBalanced = isBalanced(cur.right, right);
+        height.height = 1 + Math.max(left.height, right.height);
+        return leftBalanced && rightBalanced && Math.abs(left.height - right.height) < 2;
     }
 
     private void printTreeString(AVLNode node, FileWriter writer, int level) throws IOException {
